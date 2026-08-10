@@ -2,14 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from ..Database.database import get_db
-from ..Models.auth_model import Auth_User
-from ..Models.personal_data_model import Personal_Data
+from ..Models.auth_model import Auth_User, Personal_Data
 from ..Schemas.auth_schema import (
     SignupRequest,
     LoginRequest,
     RefreshRequest,
     TokenResponse,
-    UserResponse,
+
     PersonalDataCreate,
     PersonalDataResponse,
     PersonalDataUpdate,
@@ -53,12 +52,12 @@ async def signup(payload: SignupRequest, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=TokenResponse)
 async def login(payload: LoginRequest, db: Session = Depends(get_db)):
-    user = db.query(Auth_User).filter(Auth_User.email == payload.email).first()
+    user = db.query(Auth_User).filter(Auth_User.username == payload.username).first()
 
     if not user or not verify_password(payload.password, user.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password"
+            detail="Invalid username or password"
         )
 
     return {

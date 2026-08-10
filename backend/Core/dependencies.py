@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from ..Database.database import SessionLocal, get_db
 from ..Models.auth_model import Auth_User
 from .jwt import ALGORITHM, SECRET_KEY
+from ..Models.project_model import Projects
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
@@ -45,13 +46,7 @@ def get_user_from_token_ws(token: str) -> Auth_User | None:
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme),db: Session = Depends(get_db),) -> Auth_User:
-
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-
+    credentials_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Could not validate credentials",headers={"WWW-Authenticate": "Bearer"},)
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
 
@@ -73,6 +68,11 @@ async def get_current_user(token: str = Depends(oauth2_scheme),db: Session = Dep
 
     return user
 
-def get_api_key(length):
-    api_key = secrets.token_urlsafe(32)
+def get_api_key(length: int, db: Session) -> str:
+    api_key = secrets.token_urlsafe(length)
+
+    existing = db.query(Projects).filter(Projects.api_key == api_key).first()
+    if existing:
+        return get_api_key(length, db)
+
     return api_key

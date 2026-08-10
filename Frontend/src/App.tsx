@@ -1,30 +1,36 @@
-import { Routes, Route, Outlet } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 
-import Sidebar from "./components/sidebar";
+import ProtectedRoutes from "./context/protected_routes";
+import { AuthProvider } from "./context/auth_context";
 
-import Intro from "./pages/intro";
+import Layout from "./components/layout";
+
 import Setup from "./pages/setup";
-
-function AppLayout() {
-    return (
-        <div className="app">
-            <Sidebar />
-
-            <main className="content">
-                <Outlet />
-            </main>
-        </div>
-    );
-}
+import Auth from "./pages/auth";
+import Intro from "./pages/intro";
+import Dashboard from "./pages/dashboard";
+import Profile from "./pages/profile";
+import Projects from "./pages/projects";
+import ProjectDashboard from "./pages/project";
 
 export default function App() {
     return (
-        <Routes>
-            <Route path="/" element={<Intro />} />
+        <AuthProvider>
+            <Routes>
+                <Route path="/" element={<Intro />} />
+                <Route path="/auth" element={<Auth />} />
 
-            <Route element={<AppLayout />}>
-                <Route path="/docs" element={<Setup/>}/>
-            </Route>
-        </Routes>
+                <Route element={<ProtectedRoutes />}>
+                    <Route element={<Layout />}>
+                        <Route path="/dashboard" element={<Dashboard />} />
+                        <Route path="/docs" element={<Setup />} />
+                        <Route path="/profile" element={<Profile />} />
+                        <Route path="/projects" element={<Projects />} />
+                        <Route path="/projects/:projectId" element={<ProjectDashboard />} />
+                        <Route path="/createprofile" element={<Profile />} />
+                    </Route>
+                </Route>
+            </Routes>
+        </AuthProvider>
     );
 }

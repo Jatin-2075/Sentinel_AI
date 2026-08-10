@@ -41,6 +41,8 @@ class RefreshRequest(BaseModel):
         description="The refresh token provided during login."
     )
 
+
+
 class PersonalDataBase(BaseModel):
     name: str
     dob: str
